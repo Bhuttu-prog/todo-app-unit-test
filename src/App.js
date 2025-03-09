@@ -1,34 +1,46 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from "react";
+//import "./App.css";
+
+const mockFetchTasks = () =>
+  Promise.resolve([{ id: 1, text: "Buy groceries" }, { id: 2, text: "Walk the dog" }]);
 
 function App() {
   const [tasks, setTasks] = useState([]);
-  const [task, setTask] = useState('');
+  const [taskInput, setTaskInput] = useState("");
+
+  useEffect(() => {
+    async function fetchData() {
+      const fetchedTasks = await mockFetchTasks();
+      setTasks(fetchedTasks);
+    }
+    fetchData();
+  }, []);
 
   const addTask = () => {
-    if (task.trim() !== '') {
-      setTasks([...tasks, task]);
-      setTask('');
-    }
+    if (taskInput.trim() === "") return;
+    setTasks([...tasks, { id: Date.now(), text: taskInput }]);
+    setTaskInput("");
   };
 
-  const removeTask = (index) => {
-    setTasks(tasks.filter((_, i) => i !== index));
+  const removeTask = (taskId) => {
+    setTasks(tasks.filter(task => task.id !== taskId));
   };
 
   return (
-    <div style={{ textAlign: 'center', marginTop: '50px' }}>
-      <h2>To-Do List</h2>
+    <div>
+      <h1>To-Do List</h1>
       <input
         type="text"
-        value={task}
-        onChange={(e) => setTask(e.target.value)}
         placeholder="Enter a task"
+        value={taskInput}
+        onChange={(e) => setTaskInput(e.target.value)}
       />
       <button onClick={addTask}>Add Task</button>
       <ul>
-        {tasks.map((t, index) => (
-          <li key={index}>
-            {t} <button onClick={() => removeTask(index)}>Delete</button>
+        {tasks.map(task => (
+          <li key={task.id}>
+            {task.text}
+            <button onClick={() => removeTask(task.id)}>Delete</button>
           </li>
         ))}
       </ul>
